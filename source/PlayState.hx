@@ -56,7 +56,7 @@ class PlayState extends MusicBeatState
 	public static var storyDifficulty:Int = 1;
 
 	var halloweenLevel:Bool = false;
-
+	var brokenCombo:FlxSprite;
 	private var vocals:FlxSound;
 
 	private var dad:Character;
@@ -1953,23 +1953,37 @@ class PlayState extends MusicBeatState
 		comboSpr.velocity.y -= 150;
 
 		comboSpr.velocity.x += FlxG.random.int(1, 10);
-		add(rating);
 
+		brokenCombo = new FlxSprite().loadGraphic(Paths.image(pixelShitPart1 + 'comboBreak' + pixelShitPart2));
+		brokenCombo.screenCenter();
+		brokenCombo.x = coolText.x;
+		brokenCombo.acceleration.y = 600;
+		brokenCombo.velocity.y -= 150;
+
+		brokenCombo.velocity.x += FlxG.random.int(1, 10);
+		add(rating);
+		if (combo >= 3){
+		add(comboSpr);
+		}
 		if (!curStage.startsWith('school'))
 		{
 			rating.setGraphicSize(Std.int(rating.width * 0.7));
 			rating.antialiasing = true;
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * 0.7));
 			comboSpr.antialiasing = true;
+			brokenCombo.setGraphicSize(Std.int(brokenCombo.width * 0.7));
+			brokenCombo.antialiasing = true;
 		}
 		else
 		{
 			rating.setGraphicSize(Std.int(rating.width * daPixelZoom * 0.7));
 			comboSpr.setGraphicSize(Std.int(comboSpr.width * daPixelZoom * 0.7));
+			brokenCombo.setGraphicSize(Std.int(brokenCombo.width * 0.7));
 		}
 
 		comboSpr.updateHitbox();
 		rating.updateHitbox();
+		brokenCombo.updateHitbox();
 
 		var seperatedScore:Array<Int> = [];
 
@@ -2032,6 +2046,15 @@ class PlayState extends MusicBeatState
 				comboSpr.destroy();
 
 				rating.destroy();
+			},
+			startDelay: Conductor.crochet * 0.001
+		});
+
+
+		FlxTween.tween(brokenCombo, {alpha: 0}, 1, {
+			onComplete: function(tween:FlxTween)
+			{
+				brokenCombo.destroy();
 			},
 			startDelay: Conductor.crochet * 0.001
 		});
@@ -2211,6 +2234,7 @@ class PlayState extends MusicBeatState
 
 	function noteMiss(direction:Int = 1, daNote:Note):Void
 	{
+		add(brokenCombo);
 		songMisses++;
 		if (!boyfriend.stunned)
 		{
